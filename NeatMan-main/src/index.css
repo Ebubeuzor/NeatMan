@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+  
+.example {
+  width: -webkit-fill-available;
+}
+
+.slick-next {
+  right: -11px;
+}
+
+.slick-prev {
+  left: -11px;
+}
+
+body {
+  font-family: 'raleway', Arial, Helvetica, sans-serif;
+}
+:where(.css-dev-only-do-not-override-xu9wm8).ant-pagination .ant-pagination-item a {
+  display: block;
+  padding: 0 6px;
+  color: rgba(0, 0, 0, 0.88);
+  background: white;
+  border-radius: 6px;
+}

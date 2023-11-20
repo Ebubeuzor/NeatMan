@@ -1,0 +1,14 @@
+{
+  "data": {
+    "id": 1,
+    "Title": "Men",
+    "Categories": [
+      { "id": 1, "categories": "Shirts", "subMenu": "TOPS", "menu": "Men" },
+      { "id": 2, "categories": "T-Shirt", "subMenu": "TOPS", "menu": "Men" },
+      { "id": 3, "categories": "Polo", "subMenu": "TOPS", "menu": "Men" },
+      { "id": 4, "categories": "Pant", "subMenu": "Bottom", "menu": "Men" },
+      { "id": 5, "categories": "Jean", "subMenu": "Bottom", "menu": "Men" },
+      { "id": 6, "categories": "Joggers", "subMenu": "Bottom", "menu": "Men" }
+    ]
+  }
+}
