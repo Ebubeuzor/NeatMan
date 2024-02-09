@@ -10,6 +10,7 @@ import { useStateContext } from "../../context/ContextProvider";
 export default function EditHomepage() {
  
   
+  const [loading,setLoading] = useState(false);
   const {notification,setNotification,token,setToken,setUser,user} = useStateContext();
   const [slides, setSlides] = useState([
     {
@@ -50,6 +51,7 @@ export default function EditHomepage() {
 
   const handleSlideSubmit = (index) => (event) => {
     event.preventDefault();
+    setLoading(true);
     const slide = slides[index];
     const slideData = {
       [`Section${index + 1}ImageUrl`]: slide.imageFileUrl,
@@ -63,6 +65,7 @@ export default function EditHomepage() {
     .then(({data}) => {
       console.log(data);
       setNotification("Your homepage has been modified");
+      setLoading(false);
     })
     .catch((error) => {
       console.log(error);
@@ -118,7 +121,34 @@ export default function EditHomepage() {
        <Sidebar/>
       </div>
       <div className="main-content flex-1 p-4">
-          {slides.map((slide, index) => (
+      {
+            loading && (
+              <div className="flex justify-center items-center mt-10 mb-10">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-10 w-10 text-green-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm12 0a8 8 0 100-16v3a5 5 0 010 10v3a8 8 0 000 16 4 4 0 110-8 4 4 0 004-4v-3a5 5 0 010-10v-3z"
+                  ></path>
+                </svg>
+                <span>Loading...</span>
+              </div>
+            )
+          }
+          {!loading && slides.map((slide, index) => (
             <form key={index} onSubmit={handleSlideSubmit(index)} encType="multipart/form-data">
               <section className="in-page__cell bg-slate-200 rounded-lg shadow-lg p-4">
                 <h1 className="fontBold">Slide {index + 1}</h1>

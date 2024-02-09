@@ -25,6 +25,7 @@ export default function NewProducts() {
   const [specifications, setspecifications] = useState("");
   const [selectedCategory, setSelectedCategory] = useState([]);
   const [error, setError] = useState({__html: ""});
+  const [loading,setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -61,19 +62,20 @@ export default function NewProducts() {
   },[])
   
 
-  
-  if (id) {
-    useEffect(() => {
-      axiosClient.get(`/products/${id}`)
-        .then(({ data }) => {
-          setFormData(data.data);
-          console.log(data);
-          const imageUrls = data.data.image.map((imgObj) => imgObj.image);
-          setGalleryImages(imageUrls);
-        const categoryId = data.data.categories.map((catObj) => catObj.id);
-        setSelectedCategory(categoryId);
-
+  const getProductToUpdate = () => {
+    setLoading(true)
+    axiosClient.get(`/products/${id}`)
+    .then(({ data }) => {
+      setFormData(data.data);
+      console.log(data);
+      const imageUrls = data.data.image.map((imgObj) => imgObj.image);
+      setGalleryImages(imageUrls);
+      console.log(galleryImages);
+      const categoryId = data.data.categories.map((catObj) => catObj.id);
+      setSelectedCategory(categoryId);
+      
       setFrontImage_Url(data.data.frontImage);
+      setLoading(false)
     }).catch((error) => {
       
       if (error.response && error.response.status === 422) {
@@ -93,6 +95,11 @@ export default function NewProducts() {
       }
       
     })
+  }
+
+  if (id) {
+    useEffect(() => {
+      getProductToUpdate()
   }, []);
 }
 
@@ -112,6 +119,8 @@ const handleCategoryChange = (event) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    setLoading(true);
     const data = {
       ...formData,
       categories:selectedCategory,
@@ -156,8 +165,11 @@ const handleCategoryChange = (event) => {
 
     res.then(({data}) => {
       if (id) {
+        setLoading(false);
         setNotification('Poduct was updated')
+        getProductToUpdate()
       } else {
+        setLoading(false);
         setNotification('Poduct has been added')
       }
     })
@@ -255,9 +267,37 @@ const handleCategoryChange = (event) => {
             {id && <h1 className="fontBold text-lg">Update Products</h1>}
           </div>
         </header>
+          {
+            loading && (
+              <div className="flex justify-center items-center mt-10 mb-10">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-10 w-10 text-green-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm12 0a8 8 0 100-16v3a5 5 0 010 10v3a8 8 0 000 16 4 4 0 110-8 4 4 0 004-4v-3a5 5 0 010-10v-3z"
+                  ></path>
+                </svg>
+                <span>Loading...</span>
+              </div>
+            )
+          }
+          
 
         <div className="bg-slate-200 rounded-lg shadow-lg p-4">
-          <form className="border border-gray-300 p-4" onSubmit={(ev) => handleSubmit(ev)}>
+          {!loading && <form className="border border-gray-300 p-4" onSubmit={(ev) => handleSubmit(ev)}>
             
             {
               error.__html && (
@@ -329,12 +369,13 @@ const handleCategoryChange = (event) => {
               </>
             }
 
-            <Button text=" Add Product" />
-          </form>
+            {!id &&<Button text=" Add Product" />}
+            {id &&<Button text=" Update Product" />}
+          </form>}
         </div>
         </div>
 
-      <div className="sidebar bg-gray-200 w-1/4 border border-gray-300 h-[100vh] overflow-scroll">
+      {!loading && <div className="sidebar bg-gray-200 w-1/4 border border-gray-300 h-[100vh] overflow-scroll">
         
         <div className="border-b border-gray-300 p-4 fontBold">
           <h2 className="border-b border-gray-300 py-4 fontBold text-2xl">
@@ -429,8 +470,17 @@ const handleCategoryChange = (event) => {
                 className="gallery-image h-16 mr-4 my-4"
               />
             ))}
-            
+
             {id && galleryImages.map((image, index) => (
+              <img
+                key={index}
+                src={image}
+                alt={`Product Image ${index}`}
+                className="gallery-image h-16 mr-4 my-4"
+              />
+            ))}
+            
+            {id && ugalleryImages.map((image, index) => (
               <img
                 key={index}
                 src={image}
@@ -468,7 +518,7 @@ const handleCategoryChange = (event) => {
             {notification}
         </div>)
       }
-      </div>
+      </div>}
     </div>
   );
 }

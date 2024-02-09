@@ -11,6 +11,7 @@ export default function EditCategories() {
   const [existingCategories, setExistingCategories] = useState([]);
 
 
+  const [loading,setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editedCategories, setEditedCategories] = useState({});
   const [categoryToDelete, setCategoryToDelete] = useState(null);
@@ -50,9 +51,11 @@ export default function EditCategories() {
   
 
   const getCategories = () => {
+    setLoading(true);
     axiosClient.get("category")
     .then(({data}) => {
       setExistingCategories(data.data);
+      setLoading(false);
     })
     .catch(e => console.log(e))
   }
@@ -60,23 +63,28 @@ export default function EditCategories() {
   useEffect(() => getCategories(),[])
 
   const saveNewCategory = (e) => {
-    e.preventDefault(); // Prevent the form from submitting and page refreshing
+    e.preventDefault();
+    setLoading(true);
     const newCategoryObject = { category: newCategory };
-    setExistingCategories([...existingCategories, newCategoryObject]);
-    setNewCategory('');
-
+    
     // Log the new category to the console
     console.log('New Category Added:', newCategoryObject);
-    axiosClient.post("/category",newCategoryObject)
+    
+    axiosClient.post("/category", newCategoryObject)
     .then((data) => {
       console.log(data);
       setNotification("Category has been added");
-    })
-    .catch(e => console.log(e))
+      setExistingCategories([...existingCategories, data.data]); // Update state with the newly added category
+      setNewCategory(data.data.name); // Update the input field with the new category name
+      setLoading(false);
+      })
+      .catch(e => console.log(e));
   };
+  
 
   const saveEditedCategory = (ev,categoryId) => {
     ev.preventDefault();
+    setLoading(true);
     const data = {
       "category" : editedCategory
     };
@@ -106,7 +114,7 @@ export default function EditCategories() {
     
     axiosClient.delete(`category/${id}`)
     .then(() => {
-      setNotification(editedCategory + " has been deleted");
+      setNotification("Category has been deleted");
       getCategories();
     })
     .catch(e => console.log(e))
@@ -135,7 +143,35 @@ export default function EditCategories() {
               </div>
             </form>
           </div>
-          {existingCategories.map((category) => (
+          {
+            loading && (
+              <div className="flex justify-center items-center mt-10 mb-10">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-10 w-10 text-green-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm12 0a8 8 0 100-16v3a5 5 0 010 10v3a8 8 0 000 16 4 4 0 110-8 4 4 0 004-4v-3a5 5 0 010-10v-3z"
+                  ></path>
+                </svg>
+                <span>Loading...</span>
+              </div>
+            )
+          }
+
+          {!loading && existingCategories.map((category) => (
             <div key={category.id}>
               <form onSubmit={(ev) => saveEditedCategory(ev,category.id)}>
                 <input
